@@ -1,45 +1,31 @@
-"""
-Description:
- Generates a CSV reports containing all married couples in
- the Social Network database.
-
-Usage:
- python marriage_report.py
-"""
-import os
 import sqlite3
-from create_relationships import db_path, script_dir
+from faker import Faker
 
-def main():
-    # Query DB for list of married couples
-    married_couples = get_married_couples()
+# Connect to the database
+con = sqlite3.connect('social_network.db')
+cur = con.cursor()
 
-    # Save all married couples to CSV file
-    csv_path = os.path.join(script_dir, 'married_couples.csv')
-    save_married_couples_csv(married_couples, csv_path)
+# SQL query to create the people table
+create_people_tbl_query = """
+    CREATE TABLE IF NOT EXISTS people (
+        id INTEGER PRIMARY KEY,
+        name TEXT NOT NULL
+    );
+"""
 
-def get_married_couples():
-    """Queries the Social Network database for all married couples.
+# Execute the SQL query
+cur.execute(create_people_tbl_query)
 
-    Returns:
-        list: (name1, name2, start_date) of married couples 
-    """
-    # TODO: Function body
-    # Hint: See example code in lab instructions entitled "Get a List of Relationships"
-    con = sqlite3.connect(db_path)
-    return
+# Prepare to populate the table with fake data
+fake = Faker()
+add_person_query = """
+    INSERT INTO people (name) VALUES (?);
+"""
 
-def save_married_couples_csv(married_couples, csv_path):
-    """Saves list of married couples to a CSV file, including both people's 
-    names and their wedding anniversary date  
+# Insert 200 fake people
+for _ in range(200):
+    cur.execute(add_person_query, (fake.name(),))
 
-    Args:
-        married_couples (list): (name1, name2, start_date) of married couples
-        csv_path (str): Path of CSV file
-    """
-    # TODO: Function body
-    # Hint: We did this in Lab 7.
-    return
-
-if __name__ == '__main__':
-   main()
+# Commit changes and close connection
+con.commit()
+con.close()
